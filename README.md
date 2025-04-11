@@ -219,7 +219,7 @@ func main() {
 
   err = t2.Validate()
   if err != nil {
-    fmt.Printf("ERROR: Built intance is not valid: %v\n", err)
+    fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
   }
 }
 ```
