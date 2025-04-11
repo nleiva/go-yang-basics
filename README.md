@@ -204,7 +204,6 @@ module base {
 
 This means valid values for `base-container-leaf-3` must be between `1..4` or `10..20`.
 
----
 
 ### Example 1: Invalid Parsed Input
 
