@@ -108,21 +108,19 @@ Example: [`build/main.go`](build/main.go)
 package main
 
 import (
-	"fmt"
-	model "github.com/nleiva/yang-gen/pkg"
-	"github.com/openconfig/ygot/ygot"
+  "fmt"
+  model "github.com/nleiva/yang-gen/pkg"
+  "github.com/openconfig/ygot/ygot"
 )
 
 func main() {
-	t := model.Test{}
-	base := t.GetOrCreateBaseContainer()
-	base.BaseContainerLeaf_1 = ygot.String("hello")
-	base.BaseContainerLeaf_2 = ygot.Int32(1)
+  t := model.Test{}
+  base := t.GetOrCreateBaseContainer()
+  base.BaseContainerLeaf_1 = ygot.String("hello")
+  base.BaseContainerLeaf_2 = ygot.Int32(1)
 
-	jsonOutput, _ := ygot.EmitJSON(&t, &ygot.EmitJSONConfig{
-		Format: ygot.RFC7951,
-	})
-	fmt.Println(jsonOutput)
+  jsonOutput, _ := ygot.EmitJSON(&t, &ygot.EmitJSONConfig{Format: ygot.RFC7951})
+  fmt.Println(jsonOutput)
 }
 ```
 
@@ -151,21 +149,18 @@ Example: [`parse/main.go`](parse/main.go)
 package main
 
 import (
-	"fmt"
-	model "github.com/nleiva/yang-gen/pkg"
+  "fmt"
+  model "github.com/nleiva/yang-gen/pkg"
 )
 
 func main() {
-	input := `{ "base-container": { "base-container-leaf-1": "hello", "base-container-leaf-2": 1 }}`
-	t := model.Test{}
+  input := `{ "base-container": { "base-container-leaf-1": "hello", "base-container-leaf-2": 1 }}`
+ 
+  t := model.Test{}
+  model.Unmarshal([]byte(input), &t)
 
-	if err := model.Unmarshal([]byte(input), &t); err != nil {
-		fmt.Printf("Can't unmarshal JSON: %v", err)
-		return
-	}
-
-	fmt.Println("Leaf1:", *t.BaseContainer.BaseContainerLeaf_1)
-	fmt.Println("Leaf2:", *t.BaseContainer.BaseContainerLeaf_2)
+  fmt.Println("Leaf1:", *t.BaseContainer.BaseContainerLeaf_1)
+  fmt.Println("Leaf2:", *t.BaseContainer.BaseContainerLeaf_2)
 }
 ```
 
@@ -217,15 +212,15 @@ Build a model instance with a value outside the specified range (`21`):
 
 ```go
 func main() {
-	// Built example
-	t2 := model.Test{}
-	base := t2.GetOrCreateBaseContainer()
-	base.BaseContainerLeaf_3 = ygot.Int32(21)
+  // Built example
+  t2 := model.Test{}
+  base := t2.GetOrCreateBaseContainer()
+  base.BaseContainerLeaf_3 = ygot.Int32(21)
 
-	err = t2.Validate()
-	if err != nil {
-		fmt.Printf("ERROR: Built intance is not valid: %v\n", err)
-	}
+  err = t2.Validate()
+  if err != nil {
+    fmt.Printf("ERROR: Built intance is not valid: %v\n", err)
+  }
 }
 ```
 ### Example 2: Invalid Parsed Input
@@ -234,18 +229,16 @@ Parse a model instance with an invalid value (`5`):
 
 ```go
 func main() {
-	// Parsed example
-	input := `{ "base-container": { "base-container-leaf-3": 5 }}`
+  // Parsed example
+  input := `{ "base-container": { "base-container-leaf-3": 5 }}`
 
-	t1 := model.Test{}
-	if err := model.Unmarshal([]byte(input), &t1); err != nil {
-		fmt.Printf("ERROR: Can't unmarshal JSON: %v\n", err)
-	}
+  t1 := model.Test{}
+  model.Unmarshal([]byte(input), &t1)
 
-	err := t1.Validate()
-	if err != nil {
-		fmt.Printf("ERROR: Parsed input is not valid: %v\n", err)
-	}
+  err := t1.Validate()
+  if err != nil {
+    fmt.Printf("ERROR: Parsed input is not valid: %v\n", err)
+  }
 }
 ```
 
