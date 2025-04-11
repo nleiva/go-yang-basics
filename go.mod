@@ -1,4 +1,4 @@
-module github.com/nleiva/yang-gen
+module github.com/nleiva/go-yang-basics
 
 go 1.23.4
 

@@ -109,7 +109,7 @@ package main
 
 import (
   "fmt"
-  model "github.com/nleiva/yang-gen/pkg"
+  model "github.com/nleiva/go-yang-basics/pkg"
   "github.com/openconfig/ygot/ygot"
 )
 
@@ -150,7 +150,7 @@ package main
 
 import (
   "fmt"
-  model "github.com/nleiva/yang-gen/pkg"
+  model "github.com/nleiva/go-yang-basics/pkg"
 )
 
 func main() {
