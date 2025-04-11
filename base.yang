@@ -1,12 +1,16 @@
-
 module base {
   namespace "urn:mod";
   prefix "myprefix";
 
   typedef base-type { type int32; }
-
+  typedef my-base-int32-type {
+    type int32 {
+      range "1..4 | 10..20";
+    }
+  }
   container base-container {
     leaf base-container-leaf-1 { type string; }
     leaf base-container-leaf-2 { type base-type; }
+    leaf base-container-leaf-3 { type my-base-int32-type; } 
   }
 }
