@@ -12,5 +12,18 @@ module base {
     leaf base-container-leaf-1 { type string; }
     leaf base-container-leaf-2 { type base-type; }
     leaf base-container-leaf-3 { type my-base-int32-type; } 
+    list base-container-list-1  {
+      key name;
+      leaf name {
+        type union {
+          type string {
+            pattern "<.*>|$.*";
+          }
+          type uint32 {
+            range "0 .. 1073741823";
+          }
+        }
+      }
+    }
   }
 }
