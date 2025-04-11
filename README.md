@@ -206,24 +206,7 @@ This means valid values for `base-container-leaf-3` must be between `1..4` or `1
 
 ---
 
-### Example 1: Invalid Built Instance
-
-Build a model instance with a value outside the specified range (`21`):
-
-```go
-func main() {
-  // Built example
-  t2 := model.Test{}
-  base := t2.GetOrCreateBaseContainer()
-  base.BaseContainerLeaf_3 = ygot.Int32(21)
-
-  err = t2.Validate()
-  if err != nil {
-    fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
-  }
-}
-```
-### Example 2: Invalid Parsed Input
+### Example 1: Invalid Parsed Input
 
 Parse a model instance with an invalid value (`5`):
 
@@ -238,6 +221,24 @@ func main() {
   err := t1.Validate()
   if err != nil {
     fmt.Printf("ERROR: Parsed input is not valid: %v\n", err)
+  }
+}
+```
+
+### Example 2: Invalid Built Instance
+
+Build a model instance with a value outside the specified range (`21`):
+
+```go
+func main() {
+  // Built example
+  t2 := model.Test{}
+  base := t2.GetOrCreateBaseContainer()
+  base.BaseContainerLeaf_3 = ygot.Int32(21)
+
+  err = t2.Validate()
+  if err != nil {
+    fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
   }
 }
 ```
