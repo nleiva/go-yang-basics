@@ -186,7 +186,11 @@ Leaf2: 1
 
 ## 6. Validate Instance Values
 
-Let's add custom type to the YANG model:
+You can validate values against constraints defined in your YANG model using the `Validate()` method provided by `ygot`.
+
+### Add a Range Restriction
+
+Let’s define a new typedef in `base.yang` using the [`range` statement](https://datatracker.ietf.org/doc/html/rfc7950#section-9.2.4):
 
 ```c
 module base {
@@ -203,7 +207,13 @@ module base {
 }
 ```
 
-Now, whether you built an instance with a value outside the specified range (`21`):
+This means valid values for `base-container-leaf-3` must be between `1..4` or `10..20`.
+
+---
+
+### Example 1: Invalid Built Instance
+
+Build a model instance with a value outside the specified range (`21`):
 
 ```go
 func main() {
@@ -218,8 +228,9 @@ func main() {
 	}
 }
 ```
+### Example 2: Invalid Parsed Input
 
-Or parsed one with an invalid value (`5`):
+Parse a model instance with an invalid value (`5`):
 
 ```go
 func main() {
@@ -237,9 +248,6 @@ func main() {
 	}
 }
 ```
-
-The `Validate()` method will warn you about it.
-
 
 Run it:
 
