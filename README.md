@@ -364,7 +364,7 @@ generator -path=. \
 
 ### Validate changes are enforced
 
-Create a model instance with an value (`hell`):
+Create a model instance with a value for the new leaf (`$goodbye`):
 
 ```go
 func main() {
