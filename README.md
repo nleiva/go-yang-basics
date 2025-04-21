@@ -11,6 +11,8 @@ This tutorial demonstrates how to use Go with [YANG](https://datatracker.ietf.or
 - [4. Create and Populate a YANG Instance](#4-create-and-populate-a-yang-instance)
 - [5. Parse a YANG Instance](#5-parse-a-yang-instance)
 - [6. Validate Instance Values](#6-validate-instance-values)
+- [7. Change a YANG Model](#7-change-a-yang-model)
+- [8. Extend a YANG Model](#8-extend-a-yang-model)
 
 ---
 
@@ -109,7 +111,7 @@ package main
 
 import (
   "fmt"
-  model "github.com/nleiva/go-yang-basics/pkg"
+  model "bbgithub.dev.bloomberg.com/nleiva2/go-yang-basics/pkg"
   "github.com/openconfig/ygot/ygot"
 )
 
@@ -150,7 +152,7 @@ package main
 
 import (
   "fmt"
-  model "github.com/nleiva/go-yang-basics/pkg"
+  model "bbgithub.dev.bloomberg.com/nleiva2/go-yang-basics/pkg"
 )
 
 func main() {
@@ -204,7 +206,6 @@ module base {
 
 This means valid values for `base-container-leaf-3` must be between `1..4` or `10..20`.
 
-
 ### Example 1: Invalid Parsed Input
 
 Parse a model instance with an invalid value (`5`):
@@ -250,7 +251,151 @@ go run validate/main.go
 
 Output:
 
-```
+```bash
 ERROR: Parsed input is not valid: /test/base-container: /test/base-container/base-container-leaf-3: schema "base-container-leaf-3": signed integer value 5 is outside specified ranges
 ERROR: Built intance is not valid: /test/base-container: /test/base-container/base-container-leaf-3: schema "base-container-leaf-3": signed integer value 21 is outside specified ranges
+```
+
+## 7. Change a YANG Model
+
+You can indirectly change a YANG model with a `deviation` statements.
+
+### Change a datatype in a deviation YANG model.
+
+Let’s add a pattern restriction to the base model using the [`deviation` statement](https://datatracker.ietf.org/doc/html/rfc7950#page-39):
+
+```c
+module base-dev {
+  namespace "urn:dev";
+  prefix "my-dev";
+
+  import base { prefix myprefix; }
+
+  deviation /myprefix:base-container/myprefix:base-container-leaf-1 {
+    deviate replace {
+      type string {
+        pattern 'h.*o';
+      }
+    }
+  }
+}
+```
+
+This means valid values for `base-container-leaf-1` must start with `h` and finish with an `o`. Re-run the code generation CLI command including the [`deviation.yang`](deviation.yang) file:
+
+```bash
+generator -path=. \
+  # ...
+  base.yang \
+  deviation.yang
+```
+
+### Validate changes are enforced
+
+Create a model instance with an invalid value (`hell`):
+
+```go
+func main() {
+  t := model.Test{}
+  base := t.GetOrCreateBaseContainer()
+
+  // String "hell"
+  base.BaseContainerLeaf_1 = ygot.String("hell")
+
+  err = t.Validate()
+  if err != nil {
+    fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
+  }
+}
+```
+
+Run it:
+
+```bash
+go run deviation/main.go 
+```
+
+Output:
+
+```bash
+ERROR: Built instance is not valid: /test/base-container: /test/base-container/base-container-leaf-1: schema "base-container-leaf-1": "hell" does not match regular expression pattern "^(h.*o)$"
+```
+
+## 8. Extend a YANG Model
+
+You can also add more items to a YANG data model with an `augment` statement.
+
+### Add a new item in an augment YANG model.
+
+Let’s add a new leaf to the base model using the [`augment` statement](https://datatracker.ietf.org/doc/html/rfc7950#page-28):
+
+```c
+module base-aug {
+  namespace "urn:aug";
+  prefix "my-aug";
+
+  import base { prefix myprefix; }
+
+  augment "/myprefix:base-container" {
+    leaf base-container-leaf-4 {
+      description "Another leaf";
+      type union {
+        type string {
+          pattern "<.*>|$.*";
+        }
+        type uint32 {
+          range "1 .. 1000";
+        }
+      }
+    }
+  }
+}
+```
+
+This means we now have a `base-container-leaf-4` that can be either a string between `<` and `>`, or a string that starts with `$`, or an uint32 between `0` and `1000`. Re-run the code generation CLI command including the [`augment.yang`](augment.yang) file:
+
+```bash
+generator -path=. \
+  # ...
+  base.yang \
+  deviation.yang \
+  augment.yang
+```
+
+### Validate changes are enforced
+
+Create a model instance with an value (`hell`):
+
+```go
+func main() {
+  t := model.Test{}
+  base := t.GetOrCreateBaseContainer()
+  base.BaseContainerLeaf_1 = ygot.String("hello")
+  base.BaseContainerLeaf_2 = ygot.Int32(1)
+  base.BaseContainerLeaf_4 = model.UnionString("$goodbye")
+
+  err := t.Validate()
+  if err != nil {
+    fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
+  }
+
+  jsonOutput, _ := ygot.EmitJSON(&t, &ygot.EmitJSONConfig{Format: ygot.RFC7951})
+  fmt.Println(jsonOutput)
+}
+```
+
+Run it:
+
+```bash
+go run augment/main.go 
+```
+
+Output:
+
+```bash
+{
+  "base-container-leaf-1": "hello",
+  "base-container-leaf-2": 1,
+  "base-container-leaf-4": "$goodbye"
+}
 ```

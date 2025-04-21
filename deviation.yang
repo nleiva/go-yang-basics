@@ -1,0 +1,14 @@
+module base-dev {
+  namespace "urn:dev";
+  prefix "my-dev";
+
+  import base { prefix myprefix; }
+
+  deviation /myprefix:base-container/myprefix:base-container-leaf-1 {
+    deviate replace {
+      type string {
+        pattern 'h.*o';
+      }
+    }
+  }
+}

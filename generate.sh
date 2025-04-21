@@ -6,4 +6,6 @@ generator -path=. \
   -generate_getters \
   -generate_ordered_maps=false \
   -generate_simple_unions \
-  base.yang
+  base.yang \
+  deviation.yang \
+  augment.yang

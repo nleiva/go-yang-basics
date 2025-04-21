@@ -1,0 +1,20 @@
+module base-aug {
+  namespace "urn:aug";
+  prefix "my-aug";
+
+  import base { prefix myprefix; }
+
+  augment "/myprefix:base-container" {
+    leaf base-container-leaf-4 {
+      description "Load-balance weight";
+      type union {
+        type string {
+          pattern "<.*>|$.*";
+        }
+        type uint32 {
+          range "1 .. 1000";
+        }
+      }
+    }
+  }
+}
