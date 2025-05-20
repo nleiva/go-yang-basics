@@ -1,6 +1,6 @@
-# Go YANG Basics
+# Practical YANG data modeling
 
-This tutorial demonstrates how to use Go with [YANG](https://datatracker.ietf.org/doc/html/rfc7950) data models using tools like [`goyang`](https://github.com/openconfig/goyang) and [`ygot`](https://github.com/openconfig/ygot).
+This tutorial demonstrates how to use with [YANG](https://datatracker.ietf.org/doc/html/rfc7950) data models with tools like [`goyang`](https://github.com/openconfig/goyang) and [`ygot`](https://github.com/openconfig/ygot).
 
 ## Table of Contents
 
