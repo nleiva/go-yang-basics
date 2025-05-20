@@ -8,8 +8,14 @@ on: # rebuild any PRs and main branch changes
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
 
+    permissions:
+        contents: read
+        packages: write
+        attestations: write
+        id-token: write
+
+    steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
