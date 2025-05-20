@@ -1,4 +1,5 @@
 # Practical YANG data modeling
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/nleiva/go-yang-basics?quickstart=1)
 
 This tutorial demonstrates how to use with [YANG](https://datatracker.ietf.org/doc/html/rfc7950) data models with tools like [`goyang`](https://github.com/openconfig/goyang) and [`ygot`](https://github.com/openconfig/ygot).
 
