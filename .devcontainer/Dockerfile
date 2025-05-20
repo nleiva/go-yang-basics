@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/go
 
-# Install ygot code generator
+# Install goyang YANG parser
 RUN go install github.com/openconfig/goyang@latest
+# Install ygot code generator
 RUN go install github.com/openconfig/ygot/generator@latest

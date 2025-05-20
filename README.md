@@ -28,6 +28,14 @@ We’ll be working with a simple YANG model (`base.yang`) and show how to:
 
 ---
 
+## 0. Where to run
+
+Alternatives to run the examples:
+
+1. [GitHub Codespaces](https://codespaces.new/nleiva/go-yang-basics?quickstart=1) by clicking the badge "Open in GutHub Codespaces", or 
+2. Inside a container: `docker pull ghcr.io/nleiva/practical-yang:latest`, or
+3. Any environment with [Go installed](https://go.dev/doc/install). 
+
 ## 1. Define a YANG Model
 
 Let’s use the following example: [`base.yang`](base.yang)
