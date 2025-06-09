@@ -120,7 +120,7 @@ package main
 
 import (
   "fmt"
-  model "bbgithub.dev.bloomberg.com/nleiva2/go-yang-basics/pkg"
+  model "bgithub.com/nleiva/go-yang-basics/pkg"
   "github.com/openconfig/ygot/ygot"
 )
 
@@ -161,7 +161,7 @@ package main
 
 import (
   "fmt"
-  model "bbgithub.dev.bloomberg.com/nleiva2/go-yang-basics/pkg"
+  model "bgithub.com/nleiva/go-yang-basics/pkg"
 )
 
 func main() {
