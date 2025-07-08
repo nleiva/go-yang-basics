@@ -2,18 +2,35 @@ package main
 
 import (
 	"fmt"
-	model "github.com/nleiva/go-yang-basics/pkg"
+
+	network "github.com/nleiva/go-yang-basics/pkg"
 )
 
 func main() {
+	// Sample JSON input representing a network interface configuration
+	input := `{ "interface": { "name": "eth0", "mtu": 1500 }}`
 
-	input := `{ "base-container": { "base-container-leaf-1": "hello", "base-container-leaf-2": 1 }}`
+	// Create a new device instance
+	device := network.Device{}
 
-	t := model.Test{}
-	if err := model.Unmarshal([]byte(input), &t); err != nil {
-		fmt.Printf("Can't unmarshal JSON: %v", err)
+	// Parse the JSON input into the Go struct
+	if err := network.Unmarshal([]byte(input), &device); err != nil {
+		fmt.Printf("Error parsing JSON: %v\n", err)
+		return
 	}
 
-	base := t.GetBaseContainer()
-	fmt.Printf("Leaf-1: %s\nLeaf-2: %d\n", *base.BaseContainerLeaf_1, *base.BaseContainerLeaf_2)
+	// Access the parsed values
+	iface := device.GetInterface()
+	if iface == nil {
+		fmt.Println("No interface configuration found")
+		return
+	}
+
+	fmt.Println(">> Parsed Network Interface Configuration:")
+	if iface.Name != nil {
+		fmt.Printf("Interface Name: %s\n", *iface.Name)
+	}
+	if iface.Mtu != nil {
+		fmt.Printf("MTU: %d\n", *iface.Mtu)
+	}
 }

@@ -1,8 +1,7 @@
-go install github.com/openconfig/ygot/generator@latest
 generator -path=. \
-  -output_file=pkg/base.go \
+  -output_file=pkg/network.go \
   -enum_suffix_for_simple_union_enums \
-  -package_name=test -generate_fakeroot -fakeroot_name=test \
+  -package_name=network -generate_fakeroot -fakeroot_name=device \
   -generate_getters \
   -generate_ordered_maps=false \
   -generate_simple_unions \

@@ -1,14 +1,15 @@
-module base-dev {
-  namespace "urn:dev";
-  prefix "my-dev";
+module network-device-restrictions {
+  namespace "urn:example:network:restrictions";
+  prefix "net-restrict";
 
-  import base { prefix myprefix; }
+  import network-device { prefix net; }
 
-  deviation /myprefix:base-container/myprefix:base-container-leaf-1 {
+  deviation /net:interface/net:name {
     deviate replace {
       type string {
-        pattern 'h.*o';
+        pattern 'eth[0-9]+|wlan[0-9]+';
       }
     }
+    description "Restrict interface names to ethernet (ethX) or wireless (wlanX) patterns";
   }
 }

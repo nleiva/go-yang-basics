@@ -1,29 +1,46 @@
 package main
 
 import (
-	model "github.com/nleiva/go-yang-basics/pkg"
 	"fmt"
+
+	network "github.com/nleiva/go-yang-basics/pkg"
 	"github.com/openconfig/ygot/ygot"
 )
 
 func main() {
-	t := model.Test{}
-	base := t.GetOrCreateBaseContainer()
+	device := network.Device{}
+	iface := device.GetOrCreateInterface()
 
-	// String "hello"
-	base.BaseContainerLeaf_1 = ygot.String("hello")
+	// Example 1: Valid interface name (matches pattern ethX or wlanX)
+	fmt.Println("=== Example 1: Valid Interface Name ===")
+	iface.Name = ygot.String("eth0")
 
-	err := t.Validate()
+	err := device.Validate()
 	if err != nil {
 		fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
+	} else {
+		fmt.Println("Valid interface name: eth0")
 	}
 
-	// String "hell"
-	base.BaseContainerLeaf_1 = ygot.String("hell")
+	// Example 2: Another valid interface name
+	fmt.Println("\n=== Example 2: Another Valid Interface Name ===")
+	iface.Name = ygot.String("wlan1")
 
-	err = t.Validate()
+	err = device.Validate()
 	if err != nil {
 		fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
+	} else {
+		fmt.Println("Valid interface name: wlan1")
 	}
 
+	// Example 3: Invalid interface name (doesn't match pattern)
+	fmt.Println("\n=== Example 3: Invalid Interface Name ===")
+	iface.Name = ygot.String("lo0") // loopback interface - doesn't match ethX or wlanX pattern
+
+	err = device.Validate()
+	if err != nil {
+		fmt.Printf("ERROR: Built instance is not valid: %v\n", err)
+	} else {
+		fmt.Println("Interface name is valid (unexpected)")
+	}
 }

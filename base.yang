@@ -1,16 +1,32 @@
-module base {
-  namespace "urn:mod";
-  prefix "myprefix";
+module network-device {
+  namespace "urn:example:network";
+  prefix "net";
 
-  typedef base-type { type int32; }
-  typedef my-base-int32-type {
-    type int32 {
-      range "1..4 | 10..20";
+  typedef priority-level {
+    type uint8 {
+      range "1..5 | 10..15";
     }
+    description "Network priority levels: 1-5 (low priority) or 10-15 (high priority)";
   }
-  container base-container {
-    leaf base-container-leaf-1 { type string; }
-    leaf base-container-leaf-2 { type base-type; }
-    leaf base-container-leaf-3 { type my-base-int32-type; } 
+
+  container interface {
+    description "Network interface configuration";
+    
+    leaf name {
+      type string;
+      description "Interface name (e.g., eth0, wlan0)";
+    }
+    
+    leaf mtu {
+    type uint16 {
+      range "68..9216";
+    }
+      description "Maximum Transmission Unit in bytes";
+    }
+    
+    leaf priority {
+      type priority-level;
+      description "Interface priority level";
+    }
   }
 }

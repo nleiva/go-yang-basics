@@ -1,20 +1,36 @@
-module base-aug {
-  namespace "urn:aug";
-  prefix "my-aug";
+module network-device-extensions {
+  namespace "urn:example:network:extensions";
+  prefix "net-ext";
 
-  import base { prefix myprefix; }
+  import network-device { prefix net; }
 
-  augment "/myprefix:base-container" {
-    leaf base-container-leaf-4 {
-      description "Load-balance weight";
+  augment "/net:interface" {
+    leaf status {
+      description "Interface operational status";
       type union {
-        type string {
-          pattern "<.*>|$.*";
+        type enumeration {
+          enum up {
+            description "Interface is operational";
+          }
+          enum down {
+            description "Interface is not operational";
+          }
+          enum testing {
+            description "Interface is in testing mode";
+          }
         }
-        type uint32 {
-          range "1 .. 1000";
+        type string {
+          pattern "maintenance-.*";
         }
       }
+    }
+    
+    leaf bandwidth {
+      type uint32 {
+        range "1..10000";
+      }
+      units "Mbps";
+      description "Interface bandwidth in Megabits per second";
     }
   }
 }
