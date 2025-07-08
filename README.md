@@ -292,7 +292,7 @@ We'll create examples with both valid and invalid priority values to show how th
 
 Our model defines valid priority levels as ranges `1..5` (low priority) or `10..15` (high priority). We test this validation by creating instances with both valid and invalid priority values -> [`validate/main.go`](validate/main.go)
 
-First from a JSON input string:
+First, from a JSON input string:
 
 ```go
 func main() {
@@ -365,7 +365,7 @@ module network-device-restrictions {
 }
 ```
 
-This restricts valid interface names to `ethX` or `wlanX` patterns. Re-run the code generation including the [`deviation.yang`](deviation.yang) file:
+This restricts valid interface names to `ethX` or `wlanX` patterns. Re-run the code generation, including the [`deviation.yang`](deviation.yang) file:
 
 ```bash
 generator -path=. \
@@ -374,7 +374,7 @@ generator -path=. \
   deviation.yang
 ```
 
-This regenerates the Go bindings including both the base model and the deviation, applying the interface name restrictions to the generated code.
+This regenerates the Go bindings, including both the base model and the deviation, applying the interface name restrictions to the generated code.
 
 ### Validate Pattern Restrictions
 
@@ -465,7 +465,7 @@ This adds:
 - **`status`**: Operational status (enum or custom maintenance string)
 - **`bandwidth`**: Interface bandwidth with range validation
 
-Re-run the code generation including the [`augment.yang`](augment.yang) file:
+Re-run the code generation, including the [`augment.yang`](augment.yang) file:
 
 ```bash
 generator -path=. \
