@@ -80,7 +80,6 @@ func Unmarshal(data []byte, destStruct ygot.GoStruct, opts ...ytypes.UnmarshalOp
 	return ytypes.Unmarshal(schema, destStruct, jsonTree, opts...)
 }
 
-
 func main() {
 	b := []byte(`{"Number": 1}`)
 
@@ -161,7 +160,6 @@ func main() {
 		fmt.Printf("Can't unmarshal JSON: %v\n", err)
 	}
 	fmt.Printf("\nTEST 4: %s\n", *load.String)
-
 
 	/////////
 	// TEST 5

@@ -1,4 +1,6 @@
 {
+    "name": "Go YANG Basics",
+    "postCreateCommand": "go mod download && go mod tidy",
     "build": {
         // Path is relative to the devcontainer.json file.
         "dockerfile": "Dockerfile"

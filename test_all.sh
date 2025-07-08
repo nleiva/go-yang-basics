@@ -8,6 +8,7 @@ echo ""
 echo "0. Install dependencies:"
 echo "--------------------------------------"
 go install github.com/openconfig/goyang@latest
+go install github.com/openconfig/ygot/generator@latest
 ./generate.sh
 
 echo ""

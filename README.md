@@ -1,9 +1,11 @@
 # Practical YANG data modeling
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/nleiva/go-yang-basics?quickstart=1)
 
-This tutorial demonstrates how to use Go with [YANG](https://datatracker.ietf.org/doc/html/rfc7950) data models using tools such as [`goyang`](https://github.com/openconfig/goyang) and [`ygot`](https://github.com/openconfig/ygot).
+In this tutorial, we'll turn a [YANG](https://datatracker.ietf.org/doc/html/rfc7950) data model into Go structs and types that we can use in Go programs for configuration management and validation.
 
-[YANG](https://datatracker.ietf.org/doc/html/rfc7950) is a modeling language to define configuration and operational state data models in a hierarchical data tree. It expresses the structure of data, not the data itself. Each node in the model has a name and a value or a set of child nodes. Models can describe constraints to enforce on the data. Instances of data can be expressed in XML, JSON, Protobuf, etc. and are considered valid if they adhere to the YANG data model (schema).
+We'll build a Go package that models our network device using YANG. To visualize and verify the structure of our YANG model, we can use [`goyang`](https://github.com/openconfig/goyang), which displays the model as a tree. Once we're confident in the model's structure, we use the [`ygot`](https://github.com/openconfig/ygot) generator to convert the YANG files into Go code, complete with type-safe structs, validation functions, and JSON serialization support. 
+
+[YANG](https://datatracker.ietf.org/doc/html/rfc7950) is a language for modeling configuration and operational data in a tree structure. Think of it as a schema that describes what your data should look like, not the actual data itself. Each part of the model has a name and either contains a value or has child elements. You can set rules to make sure the data is valid. The actual data can be in XML, JSON, Protobuf, or other formats, as long as it follows the YANG model's rules.
 
 ## Table of Contents
 
@@ -21,21 +23,21 @@ This tutorial demonstrates how to use Go with [YANG](https://datatracker.ietf.or
 
 ## Overview
 
-We'll be working with a practical network device configuration YANG model (`base.yang`) and show how to:
+We'll work with a network device configuration YANG model (`base.yang`) and learn how to:
 
-- Inspect it using `goyang`
-- Generate Go code using `ygot`
-- Create instances and marshal them to JSON
+- Look at it using `goyang`
+- Turn it into Go code using `ygot`
+- Create instances and convert them to JSON
 - Parse JSON back into Go structs
-- Validate configurations against YANG constraints
+- Check that configurations follow YANG rules
 
 ---
 
 ## 1. Define a YANG Model
 
-Create a practical YANG model that represents a network device interface configuration with realistic constraints and data types.
+Let's create a YANG model that represents a network device interface with constraints and data types.
 
-We'll define a YANG module that models network interface properties ([`base.yang`](base.yang)) including name, MTU (Maximum Transmission Unit), and priority levels. This demonstrates how to use YANG's built-in types, custom typedefs, ranges, and documentation.
+In [`base.yang`](base.yang), we define a YANG module that models network interface properties such as name, MTU (Maximum Transmission Unit), and priority levels. This demonstrates how to use YANG's built-in types, create custom types, specify value ranges, and include descriptive documentation.
 
 ```c
 module network-device {
@@ -73,30 +75,30 @@ module network-device {
 ```
 
 This model defines:
-- **`priority-level`**: Network priorities with two valid ranges (1-5 for low, 10-15 for high)
+- **`priority-level`**: Network priority with two valid ranges (1-5 for low, 10-15 for high)
 - **`interface`**: A container with network interface configuration properties
 
 ---
 
 ## 2. Inspect the Data Tree with `goyang` (Optional)
 
-Use the goyang tool to inspect and visualize the structure of our YANG model to understand the data hierarchy before generating Go code.
+Use `goyang` to inspect and visualize the structure of our YANG model to understand the data hierarchy before generating Go code.
 
-The `goyang` tool parses YANG files and displays them in a tree format, showing the namespace, data types, and structure. This helps verify our model is correct and understand how it will be represented.
+`goyang` parses YANG files and displays them in a tree format, showing the namespace, data types, and structure. This helps verify our model is correct and understand how it will be represented.
 
-Install `goyang`:
+First make sure `goyang` is present in your environment. If you don't have it installed, you can get it with:
 
 ```bash
 go install github.com/openconfig/goyang@latest
 ```
 
-Inspect the parsed data model:
+Look at the parsed data model:
 
 ```bash
 goyang base.yang
 ```
 
-This parses our YANG file and displays its structure in a human-readable tree format.
+This reads our YANG file and shows its structure in an easier-to-read tree format.
 
 Expected output:
 
@@ -123,17 +125,17 @@ rw: net:network-device {
 
 ## 3. Generate Go Bindings with `ygot`
 
-Transform our YANG model into Go structs and types that can be used in Go applications for configuration management and validation.
+Next, we transform our YANG model into Go structs and types that we can use in Go applications for configuration management and validation.
 
 The `ygot` generator reads YANG files and creates corresponding Go code with proper type safety, validation methods, and JSON marshaling/unmarshaling capabilities. We'll generate a Go package that represents our network device model.
 
-Install the generator:
+If you don't have it installed, you can get it with:
 
 ```bash
 go install github.com/openconfig/ygot/generator@latest
 ```
 
-Generate Go code:
+Generate Go code. Most flags are optional, but we will use some to customize the output:
 
 ```bash
 generator -path=. \
@@ -146,22 +148,41 @@ generator -path=. \
   base.yang
 ```
 
-This runs the generator with options to create Go structs in the `network` package, generate getter methods, create a root device container, and process our [`base.yang`](base.yang) file.
+This generates Go structs and getter methods in the `network` package, with a root `Device` container, all derived from [`base.yang`](base.yang).
 
-This creates Go structs in `pkg/network.go` with:
-- `Device` struct as the root container
-- `NetworkDevice_Interface` struct for interface configuration
-- Proper type constraints and validation methods
+The generated Go code in `pkg/network.go` includes:
+- A `Device` struct as the root container
+
+```go
+// Device represents the /device YANG schema element.
+type Device struct {
+	Interface *NetworkDevice_Interface
+}
+```
+
+- A `NetworkDevice_Interface` struct for interface configuration
+
+
+```go
+// NetworkDevice_Interface represents the /network-device/interface YANG schema element.
+type NetworkDevice_Interface struct {
+	Bandwidth *uint32
+	Mtu       *uint16
+	Name      *string
+}
+```
+
+- Type-safe fields and validation methods for enforcing YANG constraints
+
 
 ---
 
 ## 4. Create and Populate a YANG Instance
 
-Create a Go program that instantiates our generated structs, populates them with network configuration data, and outputs the result as JSON.
+Let's write a Go program that constructs the generated structs, populates them with network configuration values, and prints the result as JSON.
 
-We'll create a `Device` instance, configure its interface properties (name, MTU, priority).
+We'll create a `Device` instance, set its interface properties (name, MTU, priority) -> ([`build/main.go`](build/main.go))
 
-Example: [`build/main.go`](build/main.go)
 
 ```go
 func main() {
@@ -177,7 +198,7 @@ func main() {
 }
 ```
 
-Use ygot's JSON emission capabilities to output RFC 7951 compliant JSON configuration data.
+And use `ygot` to convert it to JSON.
 
 ```go
 func main() {
@@ -194,13 +215,7 @@ func main() {
 }
 ```
 
-Compile and run our build example, which creates a network device configuration and outputs it as JSON.
-
-```bash
-go run build/main.go
-```
-
-
+You can compile and run the build example with `go run build/main.go`, which creates a network device configuration and outputs it as JSON.
 
 Output:
 
@@ -216,11 +231,9 @@ Output:
 
 ## 5. Parse a YANG Instance
 
-Demonstrate how to parse JSON configuration data back into Go structs using the generated YANG bindings.
+Now let's look at how to convert JSON configuration data into Go structs using the generated code from our YANG model.
 
-We'll take a JSON string representing network interface configuration, unmarshal it into our `Device` struct.
-
-Example: [`parse/main.go`](parse/main.go)
+We'll take a JSON string with network interface configuration, convert it into our `Device` struct, and access the values through getter methods. This shows how to go from JSON back to Go structs -> [`parse/main.go`](parse/main.go)
 
 ```go
 func main() {
@@ -258,11 +271,7 @@ func main() {
 }
 ```
 
-Run our parsing example, which takes JSON input and converts it back into Go structs, then displays the parsed values:
-
-```bash
-go run parse/main.go
-```
+We can run the parsing example with `go run parse/main.go`, which takes JSON input and converts it back into Go structs, then shows the parsed values.
 
 Output:
 
@@ -275,15 +284,15 @@ MTU: 1500
 
 ## 6. Validate Instance Values
 
-Show how YANG constraints are enforced in Go code through ygot's validation mechanisms, catching invalid data before it's used.
+Next, we'll see how `ygot` enforces YANG constraints in Go by validating data and reporting errors when values don't meet the model's requirements.
 
-We'll create examples with both valid and invalid priority values to demonstrate how the `Validate()` method enforces the range constraints defined in our YANG model (1-5 or 10-15). This shows how YANG's declarative constraints become runtime validation in Go.
+We'll create examples with both valid and invalid priority values to show how the `Validate()` method enforces the range rules defined in our YANG model (1-5 or 10-15). This shows how YANG's rules become runtime validation in Go.
 
 ### Priority Level Validation
 
-Our model defines valid priority levels as ranges `1..5` (low priority) or `10..15` (high priority).
+Our model defines valid priority levels as ranges `1..5` (low priority) or `10..15` (high priority). We test this validation by creating instances with both valid and invalid priority values -> [`validate/main.go`](validate/main.go)
 
-Example: [`validate/main.go`](validate/main.go)
+First from a JSON input string:
 
 ```go
 func main() {
@@ -301,6 +310,8 @@ func main() {
 }
 ```
 
+And then from a Go struct instance:
+
 ```go
 func main() {
   // ...
@@ -316,11 +327,7 @@ func main() {
 }
 ```
 
-Run the validation example, which demonstrates how YANG constraints are enforced by creating invalid configurations and showing the resulting error messages.
-
-```bash
-go run validate/main.go 
-```
+Run the validation example using `go run validate/main.go` to see how YANG constraints are enforced. Invalid configurations will trigger error messages, demonstrating the model's validation in action.
 
 Output:
 
@@ -331,16 +338,14 @@ ERROR: ...: schema "priority": value 25 is outside specified ranges
 
 ## 7. Change a YANG Model
 
-Demonstrate how to modify existing YANG models indirectly with `deviation` statements without directly editing the original model files.
+You can modify existing YANG models using [deviation statements](https://datatracker.ietf.org/doc/html/rfc7950#section-5.6.3) without editing the original model files.
 
-YANG deviations allow you to override or modify parts of an imported model. We'll add a pattern constraint to interface names, restricting them to common network interface naming conventions (ethX, wlanX). This shows how to adapt existing models to specific organizational requirements.
+YANG deviations let you override or modify parts of an imported model. We'll add a pattern rule to interface names, limiting them to common network interface names (ethX, wlanX). This shows how to adapt existing models to your specific needs.
 
 
 ### Add Interface Name Pattern Restriction
 
-The deviation statement targets a specific leaf in the imported model and replaces its type definition with a more restrictive pattern. This creates a specialized version of the model without modifying the original.
-
-Let's add a pattern restriction to interface names using the [`deviation` statement](https://datatracker.ietf.org/doc/html/rfc7950#page-39):
+The deviation statement targets a specific leaf in the imported model and replaces its type definition with a more restrictive pattern. This creates a specialized version of the model without changing the original.
 
 ```c
 module network-device-restrictions {
@@ -373,9 +378,7 @@ This regenerates the Go bindings including both the base model and the deviation
 
 ### Validate Pattern Restrictions
 
-After regenerating the Go bindings with the deviation, we test various interface names to see which ones pass validation. The pattern `eth[0-9]+|wlan[0-9]+` only allows ethernet and wireless interface names with numbers.
-
-Example: [`deviation/main.go`](deviation/main.go)
+After regenerating the Go code with the deviation, we test various interface names to see which ones pass validation. The pattern `eth[0-9]+|wlan[0-9]+` only allows ethernet and wireless interface names with numbers -> [`deviation/main.go`](deviation/main.go)
 
 ```go
 func main() {
@@ -392,7 +395,7 @@ func main() {
 }
 ```
 
-Call ygot's `Validate()` method. 
+Invoke the `Validate()` method provided by `ygot`.
 
 ```go
 func main() {
@@ -404,11 +407,7 @@ func main() {
 }
 ```
 
-Run the deviation example, which tests both valid interface names (eth0, wlan1) and invalid ones (lo0) to demonstrate the pattern constraint enforcement.
-
-```bash
-go run deviation/main.go 
-```
+Run the deviation example with `go run deviation/main.go`, to test both valid interface names (eth0, wlan1) and an invalid one (lo0) to show the pattern rule enforcement.
 
 Output:
 
@@ -418,16 +417,15 @@ ERROR: ...: schema "name": "lo0" does not match regular expression pattern "^(et
 
 ## 8. Extend a YANG Model
 
-Show how to extend existing YANG models by adding new data elements using `augment` statements, demonstrating YANG's modular design.
+Finally, you can extend existing YANG models by adding new data elements using `augment` statements.
 
-YANG augments allow you to add new leaves, containers, or other elements to existing models without modifying the original. We'll add operational status and bandwidth information to our interface model, showing how to extend configuration models with operational data.
+YANG augments let you add new leaves, containers, or other elements to existing models without changing the original. We'll add operational status and bandwidth information to our interface model, showing how to extend configuration models with operational data.
 
 
 ### Add Operational Status and Bandwidth
 
-The augment statement targets the existing `/net:interface` container and adds two new leaves: a `status` field using union types (enum + pattern) and a `bandwidth` field with range constraints. This demonstrates YANG's advanced type system including unions and enumerations.
+The `augment` statement extends the existing `/net:interface` container by adding new operational fields: a `status` leaf that demonstrates YANG's union types (combining enumerations and pattern-restricted strings), and a `bandwidth` leaf with a defined numeric range. This highlights YANG's ability to enhance models with advanced type constructs and additional operational data.
 
-Let's add operational fields to the interface using the [`augment` statement](https://datatracker.ietf.org/doc/html/rfc7950#page-28):
 
 ```C
 module network-device-extensions {
@@ -477,13 +475,11 @@ generator -path=. \
   augment.yang
 ```
 
-This regenerates the Go bindings including the base model, deviation restrictions, and augmented fields, creating a complete unified Go interface.
+This regenerates the Go code including the base model, deviation restrictions, and augmented fields, creating a complete unified Go interface.
 
 ### Use Extended Configuration
 
-After regenerating the Go bindings with the augmented model, we can now set both the original fields (name, MTU, priority) and the new augmented fields (status, bandwidth). The generated Go code seamlessly combines all fields into a single struct, demonstrating how YANG's modular extensions become unified Go types.
-
-Example: [`augment/main.go`](augment/main.go)
+After regenerating the Go code with the augmented model, we can now set both the original fields (name, MTU, priority) and the new augmented fields (status, bandwidth). The generated Go code seamlessly combines all fields into a single struct, showing how YANG's modular extensions become unified Go types -> [`augment/main.go`](augment/main.go)
 
 ```go
 func main() {
@@ -500,7 +496,7 @@ func main() {
 }
 ```
 
-Use ygot's JSON emission capabilities to output RFC 7951 compliant JSON configuration data.
+Leverage `ygot` JSON emission feature to produce configuration data that conforms to the RFC 7951 JSON encoding standard.
 
 ```go
 func main() {
@@ -510,11 +506,7 @@ func main() {
 }
 ```
 
-Run the example to demonstrate the extended interface configuration with both original fields and augmented operational data (status, bandwidth).
-
-```bash
-go run augment/main.go 
-```
+Run the example using `go run augment/main.go` to display the interface configuration, including both the original fields and the newly added operational data (`status` and `bandwidth`).
 
 Output:
 
@@ -537,10 +529,10 @@ Output:
 - [YANG Explorer (Nokia)](https://yang.srlinux.dev): Interactive YANG model explorer
 - [YANG Data Model Explorer (Juniper)](https://apps.juniper.net/ydm-explorer/): Juniper's YANG browser
 - [YANG Catalog (IETF/Cisco)](https://www.yangcatalog.org/yang-search): Comprehensive YANG model repository
-- [Clixon](https://github.com/clicon/clixon): YANG-based configuration manager, with interactive CLI, NETCONF and RESTCONF interfaces, an embedded database and transaction mechanism.
+- [Clixon](https://github.com/clicon/clixon): YANG-based configuration manager, with interactive CLI, NETCONF and RESTCONF interfaces, an embedded database and transaction mechanism
 - [pyang](https://github.com/mbj4668/pyang): YANG validator and code generator
 
 ### OpenConfig Resources  
 - [OpenConfig Paths](https://openconfig.net/projects/models/paths/): Standard configuration paths
-- [OpenConfig Tree View](https://openconfig.net/projects/models/schemadocs/):Schema documentation
+- [OpenConfig Tree View](https://openconfig.net/projects/models/schemadocs/): Schema documentation
 - [ygot](https://github.com/openconfig/ygot): YANG Go Tools library
