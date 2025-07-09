@@ -18,8 +18,8 @@ module network-device {
     }
     
     leaf mtu {
-    type uint16 {
-      range "68..9216";
+      type uint16 {
+        range "68..9216";
     }
       description "Maximum Transmission Unit in bytes";
     }
